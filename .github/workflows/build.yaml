@@ -1,0 +1,40 @@
+# Build and push package to PyPI
+
+name: Build
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-package:
+    name: Build package
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+          architecture: 'x64'
+
+      - name: Check tag
+        run: |
+          version=$(python3 setup.py --version); if [ ${GITHUB_REF##*/} != $version ]; then
+            echo ::error::Tag \"${GITHUB_REF##*/}\" and version \"$version\" does not match.
+            exit 1
+          fi
+
+      - name: Build python packages
+        run: |
+          pip3 install build
+          python3 -m build
+
+      - name: Publish packages to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}

@@ -1,0 +1,27 @@
+# Checks are executed on each push
+
+name: Checks
+
+on: ["push"]
+
+jobs:
+  lint-cooker-client:
+    name: Lint cooker client
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: jpetrucciani/black-check@20.8b1
+
+  test-cooker-client:
+    name: Test cooker client
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+          architecture: 'x64'
+      - run: |
+          pip install pytest pytest-asyncio
+          python3 setup.py install
+          pytest -v
